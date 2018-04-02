@@ -70,22 +70,22 @@ def key_in_code_line(s):
     return matches
 
 def guess_encoding(path):
-    enc = 'utf-8'
+    enc = "utf-8"
 
     size = os.path.getsize(path)
     if size < 2:
         return enc
 
-    f = open(path, 'rb')
+    f = open(path, "rb")
     first_two_bytes = f.read(2)
     f.close()
 
     if first_two_bytes == codecs.BOM_UTF16:
-        enc = 'utf-16'
+        enc = "utf-16"
     elif first_two_bytes == codecs.BOM_UTF16_LE:
-        enc = 'utf-16-le'
+        enc = "utf-16-le"
     elif first_two_bytes == codecs.BOM_UTF16_BE:
-        enc = 'utf-16-be'
+        enc = "utf-16-be"
 
     return enc
 
@@ -195,16 +195,15 @@ def show_untranslated_keys_in_project(project_path, exclude_dirs):
                 warning(p, n, message)
 
 def main():
-
     p = optparse.OptionParser()
-    p.add_option('--project-path', '-p', dest="project_path")
-    p.add_option('--exclude-dirs', '-e', type="string", default=[], dest="exclude_dirs")
+    p.add_option("--project-path", "-p", dest="project_path")
+    p.add_option("--exclude-dirs", "-e", type="string", default=[], dest="exclude_dirs")
     options, arguments = p.parse_args()
 
     project_path = None
 
-    if 'PROJECT_DIR' in os.environ:
-        project_path = os.environ['PROJECT_DIR']
+    if "PROJECT_DIR" in os.environ:
+        project_path = os.environ["PROJECT_DIR"]
     elif options.project_path:
         project_path = options.project_path
 
