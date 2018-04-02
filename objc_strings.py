@@ -40,10 +40,10 @@ warning_count = 0
 def warning(file_path, line_number, message):
     global warning_count
     warning_count += 1
-    print "%s:%d: warning: %s" % (file_path, line_number, message.encode("utf8"))
+    print("%s:%d: warning: %s" % (file_path, line_number, message.encode("utf8")))
 
 def error(file_path, line_number, message):
-    print "%s:%d: error: %s" % (file_path, line_number, message)
+    print("%s:%d: error: %s" % (file_path, line_number, message))
 
 m_paths_and_line_numbers_for_key = {}  # [{'k1':(('f1, n1'), ('f1, n2'), ...), ...}]
 s_paths_and_line_numbers_for_key = {}  # [{'k1':(('f1, n1'), ('f1, n2'), ...), ...}]
@@ -135,7 +135,7 @@ def localized_strings_at_path(p):
     keys = set()
 
     line = 0
-    for s in f.xreadlines():
+    for s in f:
         line += 1
 
         if s.strip().startswith('//'):
@@ -191,7 +191,7 @@ def show_untranslated_keys_in_project(project_path, exclude_dirs):
 
         for k in missing_keys:
             check_warninig_count()
-            message = "missing key in %s: \"%s\"" % (language_code, unicode(k, 'utf-8'))
+            message = "missing key in %s: \"%s\"" % (language_code, str(k, 'utf-8'))
             for (p_, n) in m_paths_and_line_numbers_for_key[k]:
                 warning(p_, n, message)
 
