@@ -4,6 +4,10 @@
 # 2011-05-09 - 2013-02-21
 # https://github.com/nst/objc_strings/
 
+# Hank Wang <drapho@gmail.com>
+# 2018-04-02 -
+# https://github.com/hanksudo/objc_strings/
+
 """
 Goal: helps Cocoa applications localization by detecting unused and missing keys in '.strings' files
 
@@ -25,11 +29,11 @@ Xcode integration:
     5. set the script path to `${SOURCE_ROOT}/objc_strings.py`
 """
 
-import sys
-import os
-import re
 import codecs
 import optparse
+import os
+import re
+
 
 def warning(file_path, line_number, message):
     print "%s:%d: warning: %s" % (file_path, line_number, message.encode("utf8"))
@@ -37,8 +41,8 @@ def warning(file_path, line_number, message):
 def error(file_path, line_number, message):
     print "%s:%d: error: %s" % (file_path, line_number, message)
 
-m_paths_and_line_numbers_for_key = {} # [{'k1':(('f1, n1'), ('f1, n2'), ...), ...}]
-s_paths_and_line_numbers_for_key = {} # [{'k1':(('f1, n1'), ('f1, n2'), ...), ...}]
+m_paths_and_line_numbers_for_key = {}  # [{'k1':(('f1, n1'), ('f1, n2'), ...), ...}]
+s_paths_and_line_numbers_for_key = {}  # [{'k1':(('f1, n1'), ('f1, n2'), ...), ...}]
 
 def language_code_in_strings_path(p):
     m = re.search(".*/(.*?.lproj)/", p)
@@ -59,9 +63,9 @@ def key_in_string(s):
     return key
 
 def key_in_code_line(s):
-    matches = re.findall("NSLocalizedString.*\(\s?@?\"(.*?)\",", s);
+    matches = re.findall("NSLocalizedString.*\(\s?@?\"(.*?)\",", s)
     if len(matches) == 0:
-        return None;
+        return None
 
     return matches
 
@@ -150,7 +154,7 @@ def paths_with_files_passing_test_at_path(test, path, exclude_dirs):
             yield p
 
 def keys_set_in_code_at_path(path, exclude_dirs):
-    m_paths = paths_with_files_passing_test_at_path(lambda f:f.endswith('.m') or f.endswith('.swift'), path, exclude_dirs)
+    m_paths = paths_with_files_passing_test_at_path(lambda f: f.endswith('.m') or f.endswith('.swift'), path, exclude_dirs)
 
     localized_strings = set()
 
@@ -168,14 +172,12 @@ def show_untranslated_keys_in_project(project_path, exclude_dirs):
 
     keys_set_in_code = keys_set_in_code_at_path(project_path, exclude_dirs)
 
-    strings_paths = paths_with_files_passing_test_at_path(lambda f:f == "Localizable.strings", project_path, exclude_dirs)
+    strings_paths = paths_with_files_passing_test_at_path(lambda f: f == "Localizable.strings", project_path, exclude_dirs)
 
     for p in strings_paths:
 
         keys_set_in_strings = keys_set_in_strings_file_at_path(p)
-
         missing_keys = keys_set_in_code - keys_set_in_strings
-
         unused_keys = keys_set_in_strings - keys_set_in_code
 
         language_code = language_code_in_strings_path(p)
