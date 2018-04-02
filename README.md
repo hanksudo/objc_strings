@@ -1,28 +1,32 @@
-#### Goal
+# obj_strings
 
-Helps Cocoa applications localization by detecting unused and missing keys in '.strings' files.
+Helps Cocoa applications localization by detecting:
 
-#### Input
+- warnings for untranslated strings in *.m
+- warnings for unused keys in Localization.strings
+- errors for keys defined twice or more in the same `.strings` file
 
-Path of an Objective-C project.
+### Usage
 
-#### Output
+```bash
+$ python objc_strings.py -p /path/to/project
+./MyProject/en.lproj/Localizable.strings:13: warning: unused key in en.lproj: "Misc"
+./MyProject/ViewController.m:16: warning: missing key in fr.lproj: "World"
+```    
 
-1. warnings for untranslated strings in *.m
-2. warnings for unused keys in Localization.strings
-3. errors for keys defined twice or more in the same .strings file
+#### Project path finding order (one of them)
 
-#### Typical usage
+1. Set on option `./obj_strings.py -p project_path`
+2. Environment variable `export PROJECT_PATH=project_path`
+3. Script execution path
 
-    $ python objc_strings.py -p /path/to/obj_c/project
-    ./MyProject/en.lproj/Localizable.strings:13: warning: unused key in en.lproj: "Misc"
-    ./MyProject/ViewController.m:16: warning: missing key in fr.lproj: "World"
-
-#### Xcode integration
+### Xcode integration
 
 1. make `objc_strings.py` executable
 
-    $ chmod +x objc_strings.py
+```bash
+$ chmod +x objc_strings.py
+```
 
 2. copy `objc_strings.py` to the root of your project
 3. add a "Run Script" build phase to your target
@@ -32,20 +36,23 @@ Path of an Objective-C project.
 ![settings](https://github.com/nst/objc_strings/raw/master/images/settings.png "settings")
 ![warnings](https://github.com/nst/objc_strings/raw/master/images/warnings.png "warnings")
 
-#### Common Issues
+### Common Issues
 
 Some may experience *UnicodeDecodeError* when running the script.
 The problem is that the script runs through all directories to look for .strings files, which may include already compile .strings files which can not be parsed. Often you have some in Build/ or if you integrate CocoaPods ( Pods/ )
 
 To prevent this you can add dirs which you want to have excluded like this
+
+```bash
+"${SOURCE_ROOT}/objc_strings.py" --exclude-dirs=['Build','Pods']
 ```
-"${SRCROOT}/objc_strings.py" --exclude-dirs=['Build','Pods']
-```
+
 or if you are on terminal
-```
+
+```bash
 $ objc_strings.py --project-path /path/to/obj_c/project --exclude-dirs=['Build','Pods']
 ```
 
-#### ToDo
+### ToDo
 
 * Scan Interface Builder (.xib) Files for localized Strings
