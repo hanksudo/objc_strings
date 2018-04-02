@@ -29,6 +29,7 @@ Xcode integration:
     5. set the script path to `${SOURCE_ROOT}/objc_strings.py`
 """
 
+import ast
 import codecs
 import optparse
 import os
@@ -172,6 +173,15 @@ def keys_set_in_code_at_path(path, exclude_dirs):
 
     return localized_strings
 
+def keys_set_in_project_at_path(project_path, exclude_dirs):
+    strings_paths = paths_with_files_passing_test_at_path(lambda f: f == "Localizable.strings", project_path, exclude_dirs)
+
+    all_keys = set()
+    for p in strings_paths:
+        all_keys |= keys_set_in_strings_file_at_path(p)
+
+    return all_keys
+
 def show_untranslated_keys_in_project(project_path, exclude_dirs):
 
     if not project_path or not os.path.exists(project_path):
@@ -179,6 +189,7 @@ def show_untranslated_keys_in_project(project_path, exclude_dirs):
         return
 
     keys_set_in_code = keys_set_in_code_at_path(project_path, exclude_dirs)
+    keys_set_in_project = keys_set_in_project_at_path(project_path, exclude_dirs)
 
     strings_paths = paths_with_files_passing_test_at_path(lambda f: f == "Localizable.strings", project_path, exclude_dirs)
 
@@ -186,6 +197,7 @@ def show_untranslated_keys_in_project(project_path, exclude_dirs):
         keys_set_in_strings = keys_set_in_strings_file_at_path(p)
         missing_keys = keys_set_in_code - keys_set_in_strings
         unused_keys = keys_set_in_strings - keys_set_in_code
+        project_missing_keys = keys_set_in_project - keys_set_in_strings
 
         language_code = language_code_in_strings_path(p)
 
@@ -198,6 +210,11 @@ def show_untranslated_keys_in_project(project_path, exclude_dirs):
         for k in unused_keys:
             check_warninig_count()
             message = "unused key in %s: \"%s\"" % (language_code, k)
+            for (p, n) in s_paths_and_line_numbers_for_key[k]:
+                warning(p, n, message)
+
+        for k in project_missing_keys:
+            message = "project missing key in %s: \"%s\"" % (language_code, k)
             for (p, n) in s_paths_and_line_numbers_for_key[k]:
                 warning(p, n, message)
 
@@ -220,7 +237,7 @@ def main():
     else:
         project_path = "."
 
-    show_untranslated_keys_in_project(project_path, options.exclude_dirs)
+    show_untranslated_keys_in_project(project_path, ast.literal_eval(options.exclude_dirs))
 
 if __name__ == "__main__":
     main()
