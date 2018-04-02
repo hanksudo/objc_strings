@@ -34,8 +34,12 @@ import optparse
 import os
 import re
 
+max_warning_numbers = 50
+warning_count = 0
 
 def warning(file_path, line_number, message):
+    global warning_count
+    warning_count += 1
     print "%s:%d: warning: %s" % (file_path, line_number, message.encode("utf8"))
 
 def error(file_path, line_number, message):
@@ -43,6 +47,10 @@ def error(file_path, line_number, message):
 
 m_paths_and_line_numbers_for_key = {}  # [{'k1':(('f1, n1'), ('f1, n2'), ...), ...}]
 s_paths_and_line_numbers_for_key = {}  # [{'k1':(('f1, n1'), ('f1, n2'), ...), ...}]
+
+def check_warninig_count():
+    if warning_count >= max_warning_numbers:
+        exit(0)
 
 def language_code_in_strings_path(p):
     m = re.search(".*/(.*?.lproj)/", p)
@@ -175,7 +183,6 @@ def show_untranslated_keys_in_project(project_path, exclude_dirs):
     strings_paths = paths_with_files_passing_test_at_path(lambda f: f == "Localizable.strings", project_path, exclude_dirs)
 
     for p in strings_paths:
-
         keys_set_in_strings = keys_set_in_strings_file_at_path(p)
         missing_keys = keys_set_in_code - keys_set_in_strings
         unused_keys = keys_set_in_strings - keys_set_in_code
@@ -183,24 +190,28 @@ def show_untranslated_keys_in_project(project_path, exclude_dirs):
         language_code = language_code_in_strings_path(p)
 
         for k in missing_keys:
+            check_warninig_count()
             message = "missing key in %s: \"%s\"" % (language_code, unicode(k, 'utf-8'))
-
             for (p_, n) in m_paths_and_line_numbers_for_key[k]:
                 warning(p_, n, message)
 
         for k in unused_keys:
+            check_warninig_count()
             message = "unused key in %s: \"%s\"" % (language_code, k)
-
             for (p, n) in s_paths_and_line_numbers_for_key[k]:
                 warning(p, n, message)
 
 def main():
+    global max_warning_numbers
     project_path = None
 
     p = optparse.OptionParser()
     p.add_option("--project-path", "-p", dest="project_path")
     p.add_option("--exclude-dirs", "-e", type="string", default=[], dest="exclude_dirs")
+    p.add_option("--max-warning-numbers", "-n", type="int", default=max_warning_numbers, dest="max_warning_numbers")
     options, arguments = p.parse_args()
+
+    max_warning_numbers = options.max_warning_numbers
 
     if options.project_path:
         project_path = options.project_path
